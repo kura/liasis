@@ -7,8 +7,6 @@ import eventlet
 import socket
 import logging
 from config import config
-from status import STATUS_CODES
-from routing import ROUTES
 from log import log
 from core.server import handle
 eventlet.monkey_patch()

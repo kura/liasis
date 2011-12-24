@@ -2,8 +2,8 @@ import os
 from datetime import datetime
 from log import log
 from routing import ROUTES
-from status import STATUS_CODES
-from regexes import HTTP10_REGEX
+from core.status import STATUS_CODES
+from core.regexes import HTTP10_REGEX
 
 
 NOW = datetime.now()

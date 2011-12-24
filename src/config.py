@@ -1,5 +1,5 @@
 import os
-from regexes import CONFIG_REGEX
+from core.regexes import CONFIG_REGEX
 
 
 class Config(object):
