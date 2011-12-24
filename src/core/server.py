@@ -23,7 +23,7 @@ def handle(sock, addr):
             break
         if HTTP10_REGEX.match(line):
             log.debug("HTTP/1.0")
-            fd.write("HTTP/1.1 500 %s" % STATUS_CODES['1.1'][505])
+            fd.write("HTTP/1.1 500 %s\n" % STATUS_CODES['1.1'][505])
         if line.lower().startswith("get"):
             fd.write("HTTP/1.1 200 %s\n" % STATUS_CODES['1.1'][200])
         fd.write("Server: Asynchronous Python HTTP Daemon\n")
