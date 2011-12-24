@@ -1,10 +1,19 @@
-import datetime
+import os
+from datetime import datetime
 from log import log
 from routing import ROUTES
 from status import STATUS_CODES
 from regexes import HTTP10_REGEX
 
-now = datetime.datetime.now()
+
+NOW = datetime.now()
+FORMAT = "%a, %m %b %Y %H:%M:%S %Z"
+
+# TODO
+#
+# Fix because right now it's accepting the GET request
+# and ignoring EVERYTHING after that line because it
+# spits out it's status and content and closes connection
 
 def handle(sock, addr):
     fd = sock.makefile("rw")
@@ -18,7 +27,11 @@ def handle(sock, addr):
         if line.lower().startswith("get"):
             fd.write("HTTP/1.1 200 %s\n" % STATUS_CODES['1.1'][200])
         fd.write("Server: Asynchronous Python HTTP Daemon\n")
-        fd.write("Date: %s\n" % now.strftime("%a, %m %b %Y %H:%M:%S %Z"))
+        fd.write("Date: %s\n" % NOW.strftime(FORMAT))
+        fd.write("Last-Modified: %s\n" % modified_date("index.html"))
         log.debug(line)
         fd.write("\n\nHi Kura")
         return
+
+def modified_date(file):
+    return datetime.fromtimestamp(os.stat(file).st_mtime).strftime(FORMAT)
