@@ -41,3 +41,6 @@ class Config(object):
     def set(self, name, value):
         """Set a single config value"""
         self.__data[name] = value
+
+
+config = Config("aphttpd.conf")
