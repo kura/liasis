@@ -43,4 +43,4 @@ class Config(object):
         self.__data[name] = value
 
 
-config = Config("aphttpd.conf")
+config = Config("conf/aphttpd.conf")
