@@ -3,7 +3,7 @@ from datetime import datetime
 from log import log
 from routing import ROUTES
 from core.status import STATUS_CODES
-from core.regexes import HTTP_BASE, HTTP_HOST, END_NL
+from core.regexes import HTTP_BASE, HTTP_HOST, CRNL
 
 
 NOW = datetime.now()
@@ -34,7 +34,7 @@ class RequestHandler(object):
         if h:
             self.full_host = h.group('host')
             self.host, self.host_port = self.full_host.split(":")
-        if END_NL.match(self.line):
+        if CRNL.match(self.line):
             self.done = True
 
 def handle(sock, addr):
@@ -61,7 +61,6 @@ def handle(sock, addr):
             if r.uri == "/":
                 for p in page:
                     if os.path.exists(p):
-                        content = open(p).read()
                         tfile = p
                         break
             if modified_date(tfile) < NOW:
@@ -71,8 +70,17 @@ def handle(sock, addr):
             c.fd.write("Date: %s\n" % NOW.strftime(FORMAT))
             c.fd.write("Last-Modified: %s\n" % modified_date(tfile).strftime(FORMAT))
             c.fd.write("\n")
-            c.fd.write(content)
+            for piece in read_chunks(open(tfile, "r")):
+                print piece
+                c.fd.write(piece)
             return
 
 def modified_date(tfile):
     return datetime.fromtimestamp(os.stat(tfile).st_mtime)
+
+def read_chunks(file_obj, chunk=1024):
+    while True:
+        data = file_obj.read(chunk)
+        if not data:
+            break
+        yield data

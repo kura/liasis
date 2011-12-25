@@ -1,5 +1,5 @@
 import os
-from core.regexes import CONFIG
+from core.regexes import CONFIG, VHOST, WHITESPACE, NL
 
 
 class Config(object):
@@ -10,6 +10,7 @@ class Config(object):
     def __init__(self, path):
         self.load_file(path)
         self.load_settings()
+        self.set('vhosts', Vhosts().get())
 
     def load_file(self, path):
         """Load up the config file"""
@@ -41,6 +42,30 @@ class Config(object):
     def set(self, name, value):
         """Set a single config value"""
         self.__data[name] = value
+
+
+class Vhosts(object):
+    
+    __content = ""
+    __data = {}
+    
+    def __init__(self):
+        self.load_files()
+        self.load_settings()
+
+    def load_files(self):
+        for hfile in os.listdir("sites"):
+            self.__content += open("sites/"+hfile, "r").read()
+        self.__content = WHITESPACE.sub(" ", self.__content)
+        self.__content = NL.sub("", self.__content)
+
+    def load_settings(self):
+        vhosts = VHOST.findall(self.__content)
+        for vhost in vhosts:
+            print vhost.split(";")
+
+    def get(self):
+        return self.__data
 
 
 config = Config("conf/liasis.conf")
