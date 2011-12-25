@@ -1,5 +1,5 @@
 import os
-from core.regexes import CONFIG_REGEX
+from core.regexes import CONFIG
 
 
 class Config(object):
@@ -22,7 +22,7 @@ class Config(object):
             line = line.strip()
             if not line or line[0] in ("\n", "#"):
                 continue
-            c = CONFIG_REGEX.search(line)
+            c = CONFIG.search(line)
             if c:
                 name = c.group("name").upper()
                 value = c.group("value")
@@ -43,4 +43,4 @@ class Config(object):
         self.__data[name] = value
 
 
-config = Config("conf/aphttpd.conf")
+config = Config("conf/liasis.conf")

@@ -21,10 +21,10 @@ def main():
         eventlet.StopServer()
         sys.exit(0)
     except (SystemExit, KeyboardInterrupt):
-        log.info("Stopping Asynchronous Python HTTP Daemon ...")
+        log.info("Stopping Liasis ...")
         sys.exit(os.EX_OK)
 
 
 if __name__ == "__main__":
-    log.info("Starting Asynchronous Python HTTP Daemon ... ")
+    log.info("Starting Liasis ... ")
     main()

@@ -3,35 +3,76 @@ from datetime import datetime
 from log import log
 from routing import ROUTES
 from core.status import STATUS_CODES
-from core.regexes import HTTP10_REGEX
+from core.regexes import HTTP_BASE, HTTP_HOST, END_NL
 
 
 NOW = datetime.now()
-FORMAT = "%a, %m %b %Y %H:%M:%S %Z"
+FORMAT = "%a, %d %b %Y %H:%M:%S %Z"
 
-# TODO
-#
-# Fix because right now it's accepting the GET request
-# and ignoring EVERYTHING after that line because it
-# spits out it's status and content and closes connection
 
-def handle(sock, addr):
-    fd = sock.makefile("rw")
-    while True:
-        line = fd.readline()
-        if not line:
-            break
-        if HTTP10_REGEX.match(line):
-            log.debug("HTTP/1.0")
-            fd.write("HTTP/1.1 500 %s\n" % STATUS_CODES['1.1'][505])
-        if line.lower().startswith("get"):
-            fd.write("HTTP/1.1 200 %s\n" % STATUS_CODES['1.1'][200])
-        fd.write("Server: Asynchronous Python HTTP Daemon\n")
-        fd.write("Date: %s\n" % NOW.strftime(FORMAT))
-        fd.write("Last-Modified: %s\n" % modified_date("index.html"))
-        log.debug(line)
-        fd.write("\n\nHi Kura")
+class Client(object):
+
+    def __init__(self):
         return
 
-def modified_date(file):
-    return datetime.fromtimestamp(os.stat(file).st_mtime).strftime(FORMAT)
+
+class RequestHandler(object):
+
+    done = False
+
+    def __init__(self, client):
+        self.c = client
+
+    def handle(self, line):
+        self.line = line
+        h = HTTP_BASE.match(self.line)
+        if h:
+            self.rtype = h.group('type')
+            self.dialect = h.group('dialect')
+            self.uri = h.group('uri')
+        h = HTTP_HOST.match(self.line)
+        if h:
+            self.full_host = h.group('host')
+            self.host, self.host_port = self.full_host.split(":")
+        if END_NL.match(self.line):
+            self.done = True
+
+def handle(sock, addr):
+    c = Client()
+    c.addr = addr
+    c.fd = sock.makefile("rw")
+    r = RequestHandler(c)
+
+    while True:
+        line = c.fd.readline()
+        if not line:
+            break
+        log.debug(line.strip())
+        r.handle(line)
+        if r.done is True:
+            print r.__dict__
+            try:
+                page = ROUTES[r.uri]
+                return_code = 200
+            except KeyError:
+                page = "404"
+                return_code = 404
+            c.fd.write("\n\n")
+            if r.uri == "/":
+                for p in page:
+                    if os.path.exists(p):
+                        content = open(p).read()
+                        tfile = p
+                        break
+            if modified_date(tfile) < NOW:
+                return_code = 304
+            c.fd.write("HTTP/1.1 %s %s\n" % (return_code, STATUS_CODES['1.1'][return_code]))
+            c.fd.write("Server: Liasis\n")
+            c.fd.write("Date: %s\n" % NOW.strftime(FORMAT))
+            c.fd.write("Last-Modified: %s\n" % modified_date(tfile).strftime(FORMAT))
+            c.fd.write("\n")
+            c.fd.write(content)
+            return
+
+def modified_date(tfile):
+    return datetime.fromtimestamp(os.stat(tfile).st_mtime)
