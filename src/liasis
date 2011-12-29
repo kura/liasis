@@ -5,24 +5,26 @@ import sys
 import os
 import eventlet
 import socket
-import logging
 from config import config
 from log import log
-from core.server import handle
+from core.server import Server
+from core.listener import s, pool
 eventlet.monkey_patch()
 
 
 def main():
-    try:
-        eventlet.serve(eventlet.listen((config.get("HOST"), int(config.get("PORT")))), handle,
-                       concurrency=int(config.get("MAX_CONNECTIONS")))
-    except socket.error as e:
-        log.warn(e)
-        eventlet.StopServer()
-        sys.exit(0)
-    except (SystemExit, KeyboardInterrupt):
-        log.info("Stopping Liasis ...")
-        sys.exit(os.EX_OK)
+    while True:
+        try:
+            server = Server()
+            sock, addr = s.accept()
+            pool.spawn_n(server.handle, sock, addr)
+        except socket.error as e:
+            log.warn(e)
+            eventlet.StopServer()
+            sys.exit(0)
+        except (SystemExit, KeyboardInterrupt):
+            log.info("Stopping Liasis ...")
+            sys.exit(os.EX_OK)
 
 
 if __name__ == "__main__":
