@@ -44,7 +44,10 @@ class RequestHandler(object):
         h = HTTP_HOST.match(self.line)
         if h:
             self.full_host = h.group('host')
-            self.host, self.host_port = self.full_host.split(":")
+            host_bits = self.full_host.split(":")
+            self.host = host_bits[0]
+            if len(host_bits) > 1:
+                self.port = host_bits[1]
         if CRNL.match(self.line):
             self.done = True
         #if MODIFIED_SINCE.search(self.line):
