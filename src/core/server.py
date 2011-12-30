@@ -93,9 +93,6 @@ class Server(object):
         self.headers()
         for piece in self.read_chunks(open(self.tfile, "r")):
             self.c.write(piece)
-            # Got this idea from IBM
-            # sleep and then exit to make sure the client gets the data
-#            time.sleep(1)
         return
     
     def headers(self):
@@ -105,6 +102,8 @@ class Server(object):
         self.c.write_header("Last-Modified: %s" % self.modified_date().strftime(FORMAT))
         self.c.write_header("Content-Type: %s" % self.mime_type())
         self.c.write_header("Content-Length: %d" % self.filesize())
+        self.c.write_header("X-XSS-Protection: 1; mode=block")
+        self.c.write_header("X-Frame-Options: SAMEORIGIN")
         self.c.write("\r\n")
 
     def status(self):
