@@ -3,7 +3,6 @@ import time
 from mimetypes import MimeTypes
 from datetime import datetime
 from log import log
-from routing import ROUTES
 from core.status import STATUS_CODES
 from core.regexes import HTTP_BASE, HTTP_HOST, CRNL, MODIFIED_SINCE
 from core.listener import pool
