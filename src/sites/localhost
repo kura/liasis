@@ -4,3 +4,5 @@ server_name localhost;
 root /var/www/;
 index index.html index.htm;
 }
+include "conf.d/*";
+
