@@ -9,6 +9,7 @@ from config import config
 from log import log
 from core.server import Server
 from core.listener import s, pool
+from core.defaults import *
 eventlet.monkey_patch()
 
 
