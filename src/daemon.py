@@ -3,8 +3,6 @@ import os
 import time
 import atexit
 from signal import SIGTERM
-import eventlet
-eventlet.monkey_patch()
 
 
 class Daemon:
@@ -24,7 +22,6 @@ class Daemon:
             print "fork #1 failed: %d (%s)\n" % (e.errno, e.strerror)
             sys.exit(1)
 
-        os.chdir("/")
         os.setsid()
         os.umask(0)
 
