@@ -1,4 +1,5 @@
-from log import log
+import os
+from liasis.log import log
 
 
 class Client(object):
@@ -10,5 +11,5 @@ class Client(object):
         self.fd.write(message)
 
     def write_header(self, header):
-        log.debug("%s\r\n" % header)
+        log.debug("%s: %s\r\n" % (os.getpid(), header))
         self.write("%s\r\n" % header)

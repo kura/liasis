@@ -1,6 +1,6 @@
 import sys
 import logging
-from config import config
+from liasis.config import config
 
 
 LOGGING_LEVEL = logging.DEBUG

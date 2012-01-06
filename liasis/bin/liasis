@@ -5,12 +5,12 @@ import sys
 import os
 import eventlet
 import socket
-import threading
-from config import config
-from log import log
-from core.server import Server
-from core.listener import s, pool
-from core.defaults import *
+from liasis.core.cmd import args
+from liasis.config import config
+from liasis.log import log
+from liasis.core.server import Server
+from liasis.core.listener import listener, pool
+from liasis.core.defaults import *
 eventlet.monkey_patch()
 
 
@@ -18,7 +18,7 @@ def main():
     while True:
         try:
             server = Server()
-            sock, addr = s.accept()
+            sock, addr = listener.sock.accept()
             pool.spawn_n(server.handle, sock, addr)
         except socket.error as e:
             log.warn(e)
@@ -26,6 +26,7 @@ def main():
             sys.exit(0)
         except (SystemExit, KeyboardInterrupt):
             log.info("Stopping Liasis ...")
+            listener.close_socket()
             sys.exit(os.EX_OK)
 
 

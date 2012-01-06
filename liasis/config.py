@@ -1,5 +1,6 @@
 import os
-from core.regexes import CONFIG, INCLUDE, ASTERISK, VHOST, WHITESPACE, NL
+from liasis.core.cmd import args
+from liasis.core.regexes import CONFIG, INCLUDE, ASTERISK, VHOST, WHITESPACE, NL
 
 
 class Config(object):
@@ -7,9 +8,10 @@ class Config(object):
 
     __data = {}
     __includes = []
-    __vhosts = []
+    __vhosts = {}
 
     def __init__(self, path):
+        path = path[0].name
         self.__includes.append(path)
         self.find_includes(path)
         self.__config = ""
@@ -21,8 +23,7 @@ class Config(object):
 
     def load_file(self, path):
         """Load up the config file"""
-        if os.path.exists(path):
-            self.__config = open(path, "r").read()
+        self.__config = open(path, "r").read()
 
     def load_files(self, default):
         if os.path.exists(default):
@@ -80,7 +81,15 @@ class Config(object):
         vhosts = VHOST.findall(content)
         if len(vhosts) > 0:
             for vhost in vhosts:
-                self.__vhosts.append(vhost.split(";"))
+                this_vhost = {}
+                vhost_bits = vhost.split(";")
+                for bit in vhost_bits:
+                    if bit.startswith("server_name"):
+                        server_name = bit.split()[1]
+                    if CONFIG.match(bit+";"):
+                        m = CONFIG.search(bit+";")
+                        this_vhost[m.group("name").upper()] = m.group("value")
+                self.__vhosts[server_name] = this_vhost
 
 
-config = Config("conf/liasis.conf")
+config = Config(args.conf)
